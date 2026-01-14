@@ -26,6 +26,9 @@ export const DEFAULT_CHAIRMAN_MODEL = 'openai/gpt-5.1';
 export default function Settings({ isOpen, onClose, councilModels, chairmanModel, onSave }) {
   const [selectedCouncil, setSelectedCouncil] = useState(councilModels);
   const [selectedChairman, setSelectedChairman] = useState(chairmanModel);
+  const [apiKey, setApiKey] = useState(() => {
+    return localStorage.getItem('openrouter_api_key') || '';
+  });
 
   if (!isOpen) return null;
 
@@ -39,6 +42,7 @@ export default function Settings({ isOpen, onClose, councilModels, chairmanModel
   };
 
   const handleSave = () => {
+    localStorage.setItem('openrouter_api_key', apiKey);
     onSave(selectedCouncil, selectedChairman);
     onClose();
   };
@@ -65,6 +69,23 @@ export default function Settings({ isOpen, onClose, councilModels, chairmanModel
         </div>
 
         <div className="settings-content">
+          <section className="settings-section">
+            <h3>OpenRouter API Key</h3>
+            <p className="settings-description">
+              Enter your OpenRouter API key. Get one at{' '}
+              <a href="https://openrouter.ai/keys" target="_blank" rel="noopener noreferrer">
+                openrouter.ai/keys
+              </a>
+            </p>
+            <input
+              type="password"
+              value={apiKey}
+              onChange={(e) => setApiKey(e.target.value)}
+              placeholder="sk-or-v1-..."
+              className="api-key-input"
+            />
+          </section>
+
           <section className="settings-section">
             <h3>Council Models (Stage 1 & 2)</h3>
             <p className="settings-description">

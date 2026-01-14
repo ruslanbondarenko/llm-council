@@ -57,6 +57,8 @@ async function queryModel(
       headers: {
         "Authorization": `Bearer ${apiKey}`,
         "Content-Type": "application/json",
+        "HTTP-Referer": "https://llm-council.app",
+        "X-Title": "LLM Council",
       },
       body: JSON.stringify({
         model,

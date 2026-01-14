@@ -77,6 +77,36 @@
   color: #6b7280;
 }
 
+.settings-description a {
+  color: #4a90e2;
+  text-decoration: none;
+}
+
+.settings-description a:hover {
+  text-decoration: underline;
+}
+
+.api-key-input {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 0.875rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #fff;
+  color: #1f2937;
+  font-family: monospace;
+}
+
+.api-key-input:focus {
+  outline: none;
+  border-color: #4a90e2;
+  box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+}
+
+.api-key-input::placeholder {
+  color: #9ca3af;
+}
+
 .model-groups {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));

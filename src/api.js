@@ -1,6 +1,12 @@
 import { supabase } from './supabase.js';
 
-const OPENROUTER_API_KEY = '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';
+function getApiKey() {
+  const key = localStorage.getItem('openrouter_api_key');
+  if (!key) {
+    throw new Error('OpenRouter API key not configured. Please add it in Settings.');
+  }
+  return key;
+}
 
 function getSessionId() {
   let sessionId = localStorage.getItem('llm_council_session_id');
@@ -157,7 +163,7 @@ export const api = {
       },
       body: JSON.stringify({
         userQuery: content,
-        apiKey: OPENROUTER_API_KEY,
+        apiKey: getApiKey(),
         councilModels,
         chairmanModel,
       }),
