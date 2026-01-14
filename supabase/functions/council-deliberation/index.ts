@@ -376,14 +376,21 @@ Deno.serve(async (req: Request) => {
             models
           );
 
+          console.log('Stage 2 rankings count:', rankings.length);
+          console.log('Stage 2 labelToModel:', labelToModel);
+
           const aggregateRankings = calculateAggregateRankings(rankings, labelToModel);
+          console.log('Stage 2 aggregate rankings count:', aggregateRankings.length);
+
+          const stage2CompleteData = {
+            rankings,
+            metadata: { label_to_model: labelToModel, aggregate_rankings: aggregateRankings },
+          };
+          console.log('Sending stage2_complete event with data keys:', Object.keys(stage2CompleteData));
 
           controller.enqueue(
             encoder.encode(
-              `event: stage2_complete\ndata: ${JSON.stringify({
-                rankings,
-                metadata: { label_to_model: labelToModel, aggregate_rankings: aggregateRankings },
-              })}\n\n`
+              `event: stage2_complete\ndata: ${JSON.stringify(stage2CompleteData)}\n\n`
             )
           );
 
