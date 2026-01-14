@@ -118,6 +118,20 @@
   margin-bottom: 12px;
 }
 
+.original-response {
+  background: #f0fff8;
+  padding: 16px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  border: 2px solid #b8e6d5;
+}
+
+.original-response h4 {
+  margin: 0 0 12px 0;
+  color: #2a8259;
+  font-size: 14px;
+}
+
 .ranking-content {
   color: #333;
   line-height: 1.6;

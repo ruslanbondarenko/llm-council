@@ -14,12 +14,21 @@ function deAnonymizeText(text, labelToModel) {
   return result;
 }
 
-export default function Stage2({ rankings, labelToModel, aggregateRankings }) {
+export default function Stage2({ rankings, labelToModel, aggregateRankings, stage1Responses }) {
   const [activeTab, setActiveTab] = useState(0);
 
   if (!rankings || rankings.length === 0) {
     return null;
   }
+
+  // Find the original response from this model in stage1
+  const getCurrentModelResponse = () => {
+    if (!stage1Responses) return null;
+    const currentModel = rankings[activeTab].model;
+    return stage1Responses.find(resp => resp.model === currentModel);
+  };
+
+  const currentModelResponse = getCurrentModelResponse();
 
   return (
     <div className="stage stage2">
@@ -47,6 +56,19 @@ export default function Stage2({ rankings, labelToModel, aggregateRankings }) {
         <div className="ranking-model">
           {rankings[activeTab].model}
         </div>
+
+        {/* Show original response from this model first */}
+        {currentModelResponse && (
+          <div className="original-response">
+            <h4>Original Response from {rankings[activeTab].model.split('/')[1] || rankings[activeTab].model}</h4>
+            <div className="markdown-content">
+              <ReactMarkdown>{currentModelResponse.content}</ReactMarkdown>
+            </div>
+          </div>
+        )}
+
+        {/* Then show ranking evaluation */}
+        <h4>Evaluation of Other Responses</h4>
         <div className="ranking-content markdown-content">
           <ReactMarkdown>
             {deAnonymizeText(rankings[activeTab].ranking, labelToModel)}
