@@ -170,15 +170,17 @@ export const api = {
   },
 
   async sendMessageStream(conversationId, content, onEvent) {
+    console.log('Saving user message...');
     await this.saveUserMessage(conversationId, content);
 
     const edgeFunctionUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/council-deliberation`;
+    console.log('Calling Edge Function:', edgeFunctionUrl);
 
     const response = await fetch(edgeFunctionUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_SUPABASE_ANON_KEY}`,
+        'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
       },
       body: JSON.stringify({
         userQuery: content,
@@ -186,8 +188,12 @@ export const api = {
       }),
     });
 
+    console.log('Edge Function response status:', response.status);
+
     if (!response.ok) {
-      throw new Error('Failed to send message to Edge Function');
+      const errorText = await response.text();
+      console.error('Edge Function error:', errorText);
+      throw new Error(`Failed to send message to Edge Function: ${response.status} ${errorText}`);
     }
 
     const reader = response.body.getReader();
@@ -221,6 +227,7 @@ export const api = {
 
             try {
               const eventData = dataLine ? JSON.parse(dataLine) : {};
+              console.log('SSE event received:', eventType, eventData);
 
               if (eventType === 'stage1_start') {
                 onEvent(eventType, eventData);

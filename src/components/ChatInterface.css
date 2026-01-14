@@ -107,6 +107,7 @@
   padding: 24px;
   border-top: 1px solid #e0e0e0;
   background: #fafafa;
+  position: relative;
 }
 
 .message-input {
@@ -148,6 +149,11 @@
   transition: background 0.2s;
   white-space: nowrap;
   align-self: flex-end;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+  min-width: 100px;
 }
 
 .send-button:hover:not(:disabled) {
@@ -160,4 +166,13 @@
   cursor: not-allowed;
   background: #ccc;
   border-color: #ccc;
+}
+
+.button-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
 }

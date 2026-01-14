@@ -135,7 +135,14 @@ export default function ChatInterface({
           className="send-button"
           disabled={!input.trim() || isLoading}
         >
-          Send
+          {isLoading ? (
+            <>
+              <div className="button-spinner"></div>
+              Processing...
+            </>
+          ) : (
+            'Send'
+          )}
         </button>
       </form>
     </div>
