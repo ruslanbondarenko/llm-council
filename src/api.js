@@ -107,11 +107,6 @@ export const api = {
       throw new Error(`Failed to save user message: ${error.message}`);
     }
 
-    await supabase
-      .from('conversations')
-      .update({ message_count: supabase.raw('message_count + 1') })
-      .eq('id', conversationId);
-
     return data;
   },
 
@@ -132,11 +127,6 @@ export const api = {
     if (error) {
       throw new Error(`Failed to save assistant message: ${error.message}`);
     }
-
-    await supabase
-      .from('conversations')
-      .update({ message_count: supabase.raw('message_count + 1') })
-      .eq('id', conversationId);
 
     return data;
   },
