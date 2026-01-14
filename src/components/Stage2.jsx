@@ -31,20 +31,25 @@ export default function Stage2({ aggregateRankings }) {
               Combined results across all peer evaluations (lower score is better):
             </p>
             <div className="aggregate-list">
-              {aggregateRankings.map((agg, index) => (
-                <div key={index} className="aggregate-item">
-                  <span className="rank-position">#{index + 1}</span>
-                  <span className="rank-model">
-                    {agg.model.split('/')[1] || agg.model}
-                  </span>
-                  <span className="rank-score">
-                    Avg: {agg.average_rank.toFixed(2)}
-                  </span>
-                  <span className="rank-count">
-                    ({agg.rankings_count} votes)
-                  </span>
-                </div>
-              ))}
+              {aggregateRankings.map((agg, index) => {
+                const modelName = agg.model
+                  ? (agg.model.split('/')[1] || agg.model)
+                  : 'Unknown Model';
+                return (
+                  <div key={index} className="aggregate-item">
+                    <span className="rank-position">#{index + 1}</span>
+                    <span className="rank-model">
+                      {modelName}
+                    </span>
+                    <span className="rank-score">
+                      Avg: {agg.average_rank?.toFixed(2) || 'N/A'}
+                    </span>
+                    <span className="rank-count">
+                      ({agg.rankings_count || 0} votes)
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}

@@ -75,7 +75,8 @@ export const api = {
       throw new Error(`Failed to get messages: ${msgError.message}`);
     }
 
-    const formattedMessages = messages.map((msg) => {
+    const messagesArray = messages || [];
+    const formattedMessages = messagesArray.map((msg) => {
       if (msg.role === 'user') {
         return {
           role: 'user',

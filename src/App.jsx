@@ -60,25 +60,35 @@ function App() {
   const loadConversation = async (id) => {
     try {
       const conv = await api.getConversation(id);
-      // Initialize loading field for all assistant messages
-      if (conv && conv.messages) {
-        conv.messages = conv.messages.map(msg => {
-          if (msg.role === 'assistant' && !msg.loading) {
-            return {
-              ...msg,
-              loading: {
-                stage1: false,
-                stage2: false,
-                stage3: false,
-              }
-            };
-          }
-          return msg;
-        });
+
+      if (!conv) {
+        console.error('Conversation is null');
+        return;
       }
-      setCurrentConversation(conv);
+
+      const messages = conv.messages || [];
+
+      const processedMessages = messages.map(msg => {
+        if (msg.role === 'assistant' && !msg.loading) {
+          return {
+            ...msg,
+            loading: {
+              stage1: false,
+              stage2: false,
+              stage3: false,
+            }
+          };
+        }
+        return msg;
+      });
+
+      setCurrentConversation({
+        ...conv,
+        messages: processedMessages
+      });
     } catch (error) {
       console.error('Failed to load conversation:', error);
+      alert(`Failed to load conversation: ${error.message}`);
     }
   };
 

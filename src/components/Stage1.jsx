@@ -21,12 +21,6 @@ export default function Stage1({ responses, rankings, labelToModel }) {
     return null;
   }
 
-  console.log('Stage1 props:', {
-    responsesCount: responses?.length,
-    rankingsCount: rankings?.length,
-    hasLabelToModel: !!labelToModel
-  });
-
   const toggleDetails = (modelName) => {
     setShowDetails(prev => ({
       ...prev,
@@ -49,21 +43,26 @@ export default function Stage1({ responses, rankings, labelToModel }) {
       <h3 className="stage-title">Stage 1: Individual Responses</h3>
 
       <div className="tabs">
-        {responses.map((resp, index) => (
-          <button
-            key={index}
-            className={`tab ${activeTab === index ? 'active' : ''}`}
-            onClick={() => setActiveTab(index)}
-          >
-            {resp.model.split('/')[1] || resp.model}
-          </button>
-        ))}
+        {responses.map((resp, index) => {
+          const modelName = resp.model
+            ? (resp.model.split('/')[1] || resp.model)
+            : `Model ${index + 1}`;
+          return (
+            <button
+              key={index}
+              className={`tab ${activeTab === index ? 'active' : ''}`}
+              onClick={() => setActiveTab(index)}
+            >
+              {modelName}
+            </button>
+          );
+        })}
       </div>
 
       <div className="tab-content">
-        <div className="model-name">{responses[activeTab].model}</div>
+        <div className="model-name">{responses[activeTab].model || 'Unknown Model'}</div>
         <div className="response-text markdown-content">
-          <ReactMarkdown>{responses[activeTab].response}</ReactMarkdown>
+          <ReactMarkdown>{responses[activeTab].response || ''}</ReactMarkdown>
         </div>
 
         {currentRanking && (
