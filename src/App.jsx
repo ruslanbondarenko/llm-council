@@ -69,7 +69,7 @@ function App() {
       const messages = conv.messages || [];
 
       const processedMessages = messages.map(msg => {
-        if (msg.role === 'assistant' && !msg.loading) {
+        if (msg.role === 'assistant') {
           return {
             ...msg,
             loading: {
