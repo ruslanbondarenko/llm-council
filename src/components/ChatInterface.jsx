@@ -72,43 +72,35 @@ export default function ChatInterface({
                 <div className="assistant-message">
                   <div className="message-label">LLM Council</div>
 
-                  {/* Stage 1 - Hide when Stage 3 is ready */}
-                  {!msg.stage3 && (
-                    <>
-                      {!msg.stage1 && msg.loading?.stage1 && (
-                        <div className="stage-loading">
-                          <div className="spinner"></div>
-                          <span>Running Stage 1: Collecting individual responses...</span>
-                        </div>
-                      )}
-                      {msg.stage1 && (
-                        <Stage1
-                          responses={msg.stage1}
-                          rankings={msg.stage2}
-                          labelToModel={msg.metadata?.label_to_model}
-                        />
-                      )}
-                    </>
+                  {/* Stage 1 */}
+                  {!msg.stage1 && msg.loading?.stage1 && (
+                    <div className="stage-loading">
+                      <div className="spinner"></div>
+                      <span>Running Stage 1: Collecting individual responses...</span>
+                    </div>
+                  )}
+                  {msg.stage1 && (
+                    <Stage1
+                      responses={msg.stage1}
+                      rankings={msg.stage2}
+                      labelToModel={msg.metadata?.label_to_model}
+                    />
                   )}
 
-                  {/* Stage 2 - Hide when Stage 3 is ready */}
-                  {!msg.stage3 && (
-                    <>
-                      {!msg.stage2 && msg.loading?.stage2 && (
-                        <div className="stage-loading">
-                          <div className="spinner"></div>
-                          <span>Running Stage 2: Peer rankings...</span>
-                        </div>
-                      )}
-                      {msg.stage2 && (
-                        <Stage2
-                          rankings={msg.stage2}
-                          labelToModel={msg.metadata?.label_to_model}
-                          aggregateRankings={msg.metadata?.aggregate_rankings}
-                          stage1Responses={msg.stage1}
-                        />
-                      )}
-                    </>
+                  {/* Stage 2 */}
+                  {!msg.stage2 && msg.loading?.stage2 && (
+                    <div className="stage-loading">
+                      <div className="spinner"></div>
+                      <span>Running Stage 2: Peer rankings...</span>
+                    </div>
+                  )}
+                  {msg.stage2 && (
+                    <Stage2
+                      rankings={msg.stage2}
+                      labelToModel={msg.metadata?.label_to_model}
+                      aggregateRankings={msg.metadata?.aggregate_rankings}
+                      stage1Responses={msg.stage1}
+                    />
                   )}
 
                   {/* Stage 3 */}
