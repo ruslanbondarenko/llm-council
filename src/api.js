@@ -2,8 +2,27 @@ import { supabase } from './supabase.js';
 
 const OPENROUTER_API_KEY = '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';
 
+function getSessionId() {
+  let sessionId = localStorage.getItem('llm_council_session_id');
+  if (!sessionId) {
+    sessionId = crypto.randomUUID();
+    localStorage.setItem('llm_council_session_id', sessionId);
+  }
+  return sessionId;
+}
+
+async function setSessionContext() {
+  const sessionId = getSessionId();
+  await supabase.rpc('set_config', {
+    setting: 'app.session_id',
+    value: sessionId
+  });
+}
+
 export const api = {
   async listConversations() {
+    await setSessionContext();
+
     const { data, error } = await supabase
       .from('conversations')
       .select('id, created_at, title, message_count')
@@ -17,11 +36,16 @@ export const api = {
   },
 
   async createConversation() {
+    await setSessionContext();
+
+    const sessionId = getSessionId();
+
     const { data, error } = await supabase
       .from('conversations')
       .insert({
         title: 'New Conversation',
         message_count: 0,
+        session_id: sessionId,
       })
       .select()
       .single();
@@ -34,6 +58,8 @@ export const api = {
   },
 
   async getConversation(conversationId) {
+    await setSessionContext();
+
     const { data: conversation, error: convError } = await supabase
       .from('conversations')
       .select('*')
@@ -78,6 +104,8 @@ export const api = {
   },
 
   async saveUserMessage(conversationId, content) {
+    await setSessionContext();
+
     const { data, error } = await supabase
       .from('messages')
       .insert({
@@ -101,6 +129,8 @@ export const api = {
   },
 
   async saveAssistantMessage(conversationId, stage1, stage2, stage3, metadata) {
+    await setSessionContext();
+
     const { data, error } = await supabase
       .from('messages')
       .insert({
@@ -127,6 +157,8 @@ export const api = {
   },
 
   async updateConversationTitle(conversationId, title) {
+    await setSessionContext();
+
     const { error } = await supabase
       .from('conversations')
       .update({ title })
