@@ -8,12 +8,12 @@ const corsHeaders = {
 
 const DEFAULT_COUNCIL_MODELS = [
   "openai/gpt-4o-mini",
-  "google/gemini-2.5-flash",
-  "anthropic/claude-haiku-4.5",
-  "x-ai/grok-4.1-fast",
+  "google/gemini-flash-1.5",
+  "anthropic/claude-3-haiku",
+  "x-ai/grok-beta",
 ];
 
-const DEFAULT_CHAIRMAN_MODEL = "openai/gpt-5.1";
+const DEFAULT_CHAIRMAN_MODEL = "openai/gpt-4o";
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
 
 interface Message {
