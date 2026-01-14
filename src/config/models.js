@@ -13,8 +13,6 @@ export const AVAILABLE_MODELS = [
   { id: 'x-ai/grok-4.1-fast', name: 'Grok 4.1 Fast', provider: 'xAI' },
   { id: 'x-ai/grok-4', name: 'Grok 4', provider: 'xAI' },
   { id: 'deepseek/deepseek-v3.2', name: 'DeepSeek V3.2', provider: 'DeepSeek' },
-  { id: 'z-ai/glm-4.7', name: 'GLM 4.7', provider: 'Z.AI' },
-  { id: 'qwen/qwen3-vl-32b-instruct', name: 'Qwen3 VL 32B Instruct', provider: 'Qwen' },
   
 ];
 

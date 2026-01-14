@@ -192,21 +192,19 @@ async function stage2CollectRankings(
   stage1Results: Stage1Result[],
   councilModels: string[]
 ): Promise<{ rankings: Stage2Result[]; labelToModel: Record<string, string> }> {
-  console.log("Stage 2: Starting with", stage1Results.length, "Stage 1 results and", councilModels.length, "council models");
-
   const labels = stage1Results.map((_, i) => String.fromCharCode(65 + i));
-
+  
   const labelToModel: Record<string, string> = {};
   labels.forEach((label, i) => {
     labelToModel[`Response ${label}`] = stage1Results[i].model;
   });
-
+  
   console.log("Stage 2: Label to model mapping:", labelToModel);
-
+  
   const responsesText = stage1Results
     .map((result, i) => `Response ${labels[i]}:\n${result.response}`)
     .join("\n\n");
-
+  
   const rankingPrompt = `You are evaluating different responses to the following question:
 
 Question: ${userQuery}
@@ -238,12 +236,9 @@ FINAL RANKING:
 
 Now provide your evaluation and ranking:`;
 
-  console.log("Stage 2: Querying models for rankings...");
   const messages = [{ role: "user", content: rankingPrompt }];
   const responses = await queryModelsParallel(apiKey, councilModels, messages);
-
-  console.log("Stage 2: Received responses from", Object.keys(responses).length, "models");
-
+  
   const rankings: Stage2Result[] = [];
   for (const [model, response] of Object.entries(responses)) {
     if (response?.content) {
@@ -259,8 +254,7 @@ Now provide your evaluation and ranking:`;
       console.error(`Stage 2: ${model} failed to respond`);
     }
   }
-
-  console.log("Stage 2: Collected", rankings.length, "rankings");
+  
   return { rankings, labelToModel };
 }
 
@@ -375,43 +369,24 @@ Deno.serve(async (req: Request) => {
 
           controller.enqueue(encoder.encode(`event: stage2_start\ndata: {}\n\n`));
 
-          let rankings = [];
-          let labelToModel = {};
-          let aggregateRankings = [];
+          const { rankings, labelToModel } = await stage2CollectRankings(
+            apiKey,
+            userQuery,
+            stage1Results,
+            models
+          );
 
-          try {
-            console.log('Starting Stage 2 collect rankings...');
-            const stage2Result = await stage2CollectRankings(
-              apiKey,
-              userQuery,
-              stage1Results,
-              models
-            );
+          console.log('Stage 2 rankings count:', rankings.length);
+          console.log('Stage 2 labelToModel:', labelToModel);
 
-            rankings = stage2Result.rankings || [];
-            labelToModel = stage2Result.labelToModel || {};
-
-            console.log('Stage 2 rankings count:', rankings.length);
-            console.log('Stage 2 labelToModel:', labelToModel);
-
-            if (rankings.length === 0) {
-              console.warn('WARNING: No rankings received from Stage 2');
-            }
-
-            aggregateRankings = calculateAggregateRankings(rankings, labelToModel);
-            console.log('Stage 2 aggregate rankings count:', aggregateRankings.length);
-          } catch (stage2Error) {
-            console.error('ERROR in Stage 2:', stage2Error);
-            // Continue with empty rankings rather than failing
-          }
+          const aggregateRankings = calculateAggregateRankings(rankings, labelToModel);
+          console.log('Stage 2 aggregate rankings count:', aggregateRankings.length);
 
           const stage2CompleteData = {
             rankings,
             metadata: { label_to_model: labelToModel, aggregate_rankings: aggregateRankings },
           };
           console.log('Sending stage2_complete event with data keys:', Object.keys(stage2CompleteData));
-          console.log('Rankings array length:', rankings.length);
-          console.log('Aggregate rankings length:', aggregateRankings.length);
 
           controller.enqueue(
             encoder.encode(
