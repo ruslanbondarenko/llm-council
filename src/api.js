@@ -13,10 +13,20 @@ function getSessionId() {
 
 async function setSessionContext() {
   const sessionId = getSessionId();
-  await supabase.rpc('set_config', {
-    setting: 'app.session_id',
+  console.log('Setting session context:', sessionId);
+
+  const { data, error } = await supabase.rpc('set_config', {
+    key: 'app.session_id',
     value: sessionId
   });
+
+  if (error) {
+    console.error('Failed to set session context:', error);
+    throw error;
+  }
+
+  console.log('Session context set successfully');
+  return data;
 }
 
 export const api = {
