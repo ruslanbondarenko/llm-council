@@ -3,6 +3,7 @@ export const AVAILABLE_MODELS = [
   { id: 'openai/gpt-4o', name: 'GPT-4o', provider: 'OpenAI' },
   { id: 'openai/gpt-5.1', name: 'GPT-5.1', provider: 'OpenAI' },
   { id: 'google/gemini-2.5-flash', name: 'Gemini 2.5 Flash', provider: 'Google' },
+  { id: 'google/gemini-2.5-flash-lite', name: 'Gemini 2.5 Flash Lite', provider: 'Google' },
   { id: 'google/gemini-2.5-pro', name: 'Gemini 2.5 Pro', provider: 'Google' },
   { id: 'anthropic/claude-haiku-4.5', name: 'Claude Haiku 4.5', provider: 'Anthropic' },
   { id: 'anthropic/claude-sonnet-4.5', name: 'Claude Sonnet 4.5', provider: 'Anthropic' },
