@@ -4,7 +4,12 @@ import './Stage2.css';
 export default function Stage2({ aggregateRankings }) {
   const [isExpanded, setIsExpanded] = useState(false);
 
+  console.log('Stage2 component received aggregateRankings:', aggregateRankings);
+  console.log('aggregateRankings is array?', Array.isArray(aggregateRankings));
+  console.log('aggregateRankings length:', aggregateRankings?.length);
+
   if (!aggregateRankings || aggregateRankings.length === 0) {
+    console.log('Stage2: No aggregate rankings, showing fallback');
     return (
       <div className="stage stage2">
         <h3 className="stage-title">Stage 2: Peer Rankings</h3>

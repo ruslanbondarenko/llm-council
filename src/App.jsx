@@ -205,16 +205,20 @@ function App() {
             break;
 
           case 'stage2_complete':
+            console.log('Processing stage2_complete. event.data:', event.data);
+            console.log('Processing stage2_complete. event.metadata:', event.metadata);
             setCurrentConversation((prev) => {
               if (!prev) return prev;
               const messages = prev.messages.map((msg, idx) => {
                 if (idx === prev.messages.length - 1) {
-                  return {
+                  const updatedMsg = {
                     ...msg,
                     stage2: event.data,
                     metadata: event.metadata,
                     loading: { ...msg.loading, stage2: false },
                   };
+                  console.log('Updated message with stage2:', updatedMsg);
+                  return updatedMsg;
                 }
                 return msg;
               });
