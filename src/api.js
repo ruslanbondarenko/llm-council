@@ -11,31 +11,14 @@ function getSessionId() {
   return sessionId;
 }
 
-async function setSessionContext() {
-  const sessionId = getSessionId();
-  console.log('Setting session context:', sessionId);
-
-  const { data, error } = await supabase.rpc('set_config', {
-    key: 'app.session_id',
-    value: sessionId
-  });
-
-  if (error) {
-    console.error('Failed to set session context:', error);
-    throw error;
-  }
-
-  console.log('Session context set successfully');
-  return data;
-}
-
 export const api = {
   async listConversations() {
-    await setSessionContext();
+    const sessionId = getSessionId();
 
     const { data, error } = await supabase
       .from('conversations')
       .select('id, created_at, title, message_count')
+      .eq('session_id', sessionId)
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -46,8 +29,6 @@ export const api = {
   },
 
   async createConversation() {
-    await setSessionContext();
-
     const sessionId = getSessionId();
 
     const { data, error } = await supabase
@@ -68,8 +49,6 @@ export const api = {
   },
 
   async getConversation(conversationId) {
-    await setSessionContext();
-
     const { data: conversation, error: convError } = await supabase
       .from('conversations')
       .select('*')
@@ -114,8 +93,6 @@ export const api = {
   },
 
   async saveUserMessage(conversationId, content) {
-    await setSessionContext();
-
     const { data, error } = await supabase
       .from('messages')
       .insert({
@@ -139,8 +116,6 @@ export const api = {
   },
 
   async saveAssistantMessage(conversationId, stage1, stage2, stage3, metadata) {
-    await setSessionContext();
-
     const { data, error } = await supabase
       .from('messages')
       .insert({
@@ -167,8 +142,6 @@ export const api = {
   },
 
   async updateConversationTitle(conversationId, title) {
-    await setSessionContext();
-
     const { error } = await supabase
       .from('conversations')
       .update({ title })
