@@ -192,7 +192,10 @@ function App() {
               const messages = [...prev.messages];
               const lastMsg = messages[messages.length - 1];
               if (lastMsg && lastMsg.role === 'assistant') {
-                lastMsg.stage3 = `Error: ${event.message || 'Failed to process request. Please try again.'}`;
+                lastMsg.stage3 = {
+                  model: 'Error',
+                  response: event.message || 'Failed to process request. Please try again.',
+                };
                 lastMsg.loading = { stage1: false, stage2: false, stage3: false };
               }
               return { ...prev, messages };
@@ -206,13 +209,15 @@ function App() {
       });
     } catch (error) {
       console.error('Failed to send message:', error);
-      // Show error message instead of removing messages
       setCurrentConversation((prev) => {
         if (!prev) return prev;
         const messages = [...prev.messages];
         const lastMsg = messages[messages.length - 1];
         if (lastMsg && lastMsg.role === 'assistant') {
-          lastMsg.stage3 = `Error: ${error.message || 'Failed to send message. Please try again.'}`;
+          lastMsg.stage3 = {
+            model: 'Error',
+            response: error.message || 'Failed to send message. Please try again.',
+          };
           lastMsg.loading = { stage1: false, stage2: false, stage3: false };
         }
         return { ...prev, messages };
