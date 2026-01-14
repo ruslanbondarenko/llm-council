@@ -12,6 +12,8 @@ export const AVAILABLE_MODELS = [
   { id: 'anthropic/claude-opus-4.5', name: 'Claude Opus 4.5', provider: 'Anthropic' },
   { id: 'x-ai/grok-4.1-fast', name: 'Grok 4.1 Fast', provider: 'xAI' },
   { id: 'x-ai/grok-4', name: 'Grok 4', provider: 'xAI' },
+  { id: 'deepseek/deepseek-v3.2', name: 'DeepSeek V3.2', provider: 'DeepSeek' },
+  
 ];
 
 export const DEFAULT_COUNCIL_MODELS = [
