@@ -142,7 +142,7 @@ export const api = {
     }
   },
 
-  async sendMessageStream(conversationId, content, onEvent) {
+  async sendMessageStream(conversationId, content, councilModels, chairmanModel, onEvent) {
     console.log('Saving user message...');
     await this.saveUserMessage(conversationId, content);
 
@@ -158,6 +158,8 @@ export const api = {
       body: JSON.stringify({
         userQuery: content,
         apiKey: OPENROUTER_API_KEY,
+        councilModels,
+        chairmanModel,
       }),
     });
 

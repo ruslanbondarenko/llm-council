@@ -1,14 +1,40 @@
 import { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import ChatInterface from './components/ChatInterface';
+import Settings, { DEFAULT_COUNCIL_MODELS, DEFAULT_CHAIRMAN_MODEL } from './components/Settings';
 import { api } from './api';
 import './App.css';
+
+function loadModelConfig() {
+  try {
+    const saved = localStorage.getItem('llm_council_model_config');
+    if (saved) {
+      return JSON.parse(saved);
+    }
+  } catch (e) {
+    console.error('Failed to load model config:', e);
+  }
+  return {
+    councilModels: DEFAULT_COUNCIL_MODELS,
+    chairmanModel: DEFAULT_CHAIRMAN_MODEL,
+  };
+}
+
+function saveModelConfig(councilModels, chairmanModel) {
+  try {
+    localStorage.setItem('llm_council_model_config', JSON.stringify({ councilModels, chairmanModel }));
+  } catch (e) {
+    console.error('Failed to save model config:', e);
+  }
+}
 
 function App() {
   const [conversations, setConversations] = useState([]);
   const [currentConversationId, setCurrentConversationId] = useState(null);
   const [currentConversation, setCurrentConversation] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [modelConfig, setModelConfig] = useState(loadModelConfig);
 
   // Load conversations on mount
   useEffect(() => {
@@ -57,6 +83,12 @@ function App() {
     setCurrentConversationId(id);
   };
 
+  const handleSaveSettings = (councilModels, chairmanModel) => {
+    const newConfig = { councilModels, chairmanModel };
+    setModelConfig(newConfig);
+    saveModelConfig(councilModels, chairmanModel);
+  };
+
   const handleSendMessage = async (content) => {
     if (!currentConversationId || !currentConversation) return;
 
@@ -90,7 +122,12 @@ function App() {
       }));
 
       // Send message with streaming
-      await api.sendMessageStream(currentConversationId, content, (eventType, event) => {
+      await api.sendMessageStream(
+        currentConversationId,
+        content,
+        modelConfig.councilModels,
+        modelConfig.chairmanModel,
+        (eventType, event) => {
         switch (eventType) {
           case 'stage1_start':
             setCurrentConversation((prev) => {
@@ -233,11 +270,19 @@ function App() {
         currentConversationId={currentConversationId}
         onSelectConversation={handleSelectConversation}
         onNewConversation={handleNewConversation}
+        onOpenSettings={() => setSettingsOpen(true)}
       />
       <ChatInterface
         conversation={currentConversation}
         onSendMessage={handleSendMessage}
         isLoading={isLoading}
+      />
+      <Settings
+        isOpen={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        councilModels={modelConfig.councilModels}
+        chairmanModel={modelConfig.chairmanModel}
+        onSave={handleSaveSettings}
       />
     </div>
   );

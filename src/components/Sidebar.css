@@ -18,8 +18,13 @@
   color: #333;
 }
 
+.header-buttons {
+  display: flex;
+  gap: 8px;
+}
+
 .new-conversation-btn {
-  width: 100%;
+  flex: 1;
   padding: 10px;
   background: #4a90e2;
   border: 1px solid #4a90e2;
@@ -34,6 +39,22 @@
 .new-conversation-btn:hover {
   background: #357abd;
   border-color: #357abd;
+}
+
+.settings-btn {
+  padding: 10px 12px;
+  background: #fff;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  color: #374151;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.settings-btn:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
 }
 
 .conversation-list {

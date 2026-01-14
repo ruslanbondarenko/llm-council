@@ -6,14 +6,14 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
 };
 
-const COUNCIL_MODELS = [
-  "openai/gpt-5.1",
-  "google/gemini-3-pro-preview",
-  "anthropic/claude-sonnet-4.5",
-  "x-ai/grok-4",
+const DEFAULT_COUNCIL_MODELS = [
+  "openai/gpt-4o-mini",
+  "google/gemini-2.5-flash",
+  "anthropic/claude-haiku-4.5",
+  "x-ai/grok-4.1-fast",
 ];
 
-const CHAIRMAN_MODEL = "google/gemini-3-pro-preview";
+const DEFAULT_CHAIRMAN_MODEL = "openai/gpt-5.1";
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
 
 interface Message {
@@ -159,10 +159,11 @@ function calculateAggregateRankings(
 
 async function stage1CollectResponses(
   apiKey: string,
-  userQuery: string
+  userQuery: string,
+  councilModels: string[]
 ): Promise<Stage1Result[]> {
   const messages = [{ role: "user", content: userQuery }];
-  const responses = await queryModelsParallel(apiKey, COUNCIL_MODELS, messages);
+  const responses = await queryModelsParallel(apiKey, councilModels, messages);
   
   const results: Stage1Result[] = [];
   for (const [model, response] of Object.entries(responses)) {
@@ -180,7 +181,8 @@ async function stage1CollectResponses(
 async function stage2CollectRankings(
   apiKey: string,
   userQuery: string,
-  stage1Results: Stage1Result[]
+  stage1Results: Stage1Result[],
+  councilModels: string[]
 ): Promise<{ rankings: Stage2Result[]; labelToModel: Record<string, string> }> {
   const labels = stage1Results.map((_, i) => String.fromCharCode(65 + i));
   
@@ -223,9 +225,9 @@ FINAL RANKING:
 3. Response B
 
 Now provide your evaluation and ranking:`;
-  
+
   const messages = [{ role: "user", content: rankingPrompt }];
-  const responses = await queryModelsParallel(apiKey, COUNCIL_MODELS, messages);
+  const responses = await queryModelsParallel(apiKey, councilModels, messages);
   
   const rankings: Stage2Result[] = [];
   for (const [model, response] of Object.entries(responses)) {
@@ -247,7 +249,8 @@ async function stage3SynthesizeFinal(
   apiKey: string,
   userQuery: string,
   stage1Results: Stage1Result[],
-  stage2Results: Stage2Result[]
+  stage2Results: Stage2Result[],
+  chairmanModel: string
 ): Promise<Stage3Result> {
   const stage1Text = stage1Results
     .map((r) => `Model: ${r.model}\nResponse: ${r.response}`)
@@ -273,19 +276,19 @@ Your task as Chairman is to synthesize all of this information into a single, co
 - Any patterns of agreement or disagreement
 
 Provide a clear, well-reasoned final answer that represents the council's collective wisdom:`;
-  
+
   const messages = [{ role: "user", content: chairmanPrompt }];
-  const response = await queryModel(apiKey, CHAIRMAN_MODEL, messages);
-  
+  const response = await queryModel(apiKey, chairmanModel, messages);
+
   if (!response?.content) {
     return {
-      model: CHAIRMAN_MODEL,
+      model: chairmanModel,
       response: "Error: Unable to generate final synthesis.",
     };
   }
-  
+
   return {
-    model: CHAIRMAN_MODEL,
+    model: chairmanModel,
     response: response.content,
   };
 }
@@ -299,7 +302,7 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const { userQuery, apiKey } = await req.json();
+    const { userQuery, apiKey, councilModels, chairmanModel } = await req.json();
 
     if (!userQuery || !apiKey) {
       return new Response(
@@ -314,13 +317,16 @@ Deno.serve(async (req: Request) => {
       );
     }
 
+    const models = councilModels && councilModels.length > 0 ? councilModels : DEFAULT_COUNCIL_MODELS;
+    const chairman = chairmanModel || DEFAULT_CHAIRMAN_MODEL;
+
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
       async start(controller) {
         try {
           controller.enqueue(encoder.encode(`event: stage1_start\ndata: {}\n\n`));
 
-          const stage1Results = await stage1CollectResponses(apiKey, userQuery);
+          const stage1Results = await stage1CollectResponses(apiKey, userQuery, models);
           
           if (stage1Results.length === 0) {
             controller.enqueue(
@@ -343,7 +349,8 @@ Deno.serve(async (req: Request) => {
           const { rankings, labelToModel } = await stage2CollectRankings(
             apiKey,
             userQuery,
-            stage1Results
+            stage1Results,
+            models
           );
 
           const aggregateRankings = calculateAggregateRankings(rankings, labelToModel);
@@ -363,7 +370,8 @@ Deno.serve(async (req: Request) => {
             apiKey,
             userQuery,
             stage1Results,
-            rankings
+            rankings,
+            chairman
           );
 
           controller.enqueue(
