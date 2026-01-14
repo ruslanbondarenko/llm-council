@@ -15,10 +15,20 @@ export default function Settings({ isOpen, onClose, councilModels, chairmanModel
 
   const handleCouncilToggle = (modelId) => {
     setSelectedCouncil((prev) => {
+      const clickedModel = AVAILABLE_MODELS.find((m) => m.id === modelId);
+      if (!clickedModel) return prev;
+
+      const otherModelsFromProvider = AVAILABLE_MODELS
+        .filter((m) => m.provider === clickedModel.provider && m.id !== modelId)
+        .map((m) => m.id);
+
+      const newSelection = prev.filter((id) => !otherModelsFromProvider.includes(id));
+
       if (prev.includes(modelId)) {
-        return prev.filter((id) => id !== modelId);
+        return newSelection.filter((id) => id !== modelId);
+      } else {
+        return [...newSelection.filter((id) => id !== modelId), modelId];
       }
-      return [...prev, modelId];
     });
   };
 
@@ -70,8 +80,17 @@ export default function Settings({ isOpen, onClose, councilModels, chairmanModel
           <section className="settings-section">
             <h3>Council Models (Stage 1 & 2)</h3>
             <p className="settings-description">
-              Select which models participate in the council deliberation.
-              At least one model must be selected.
+              Select one model from each provider. Exactly 4 models must be selected (one per provider).
+              {selectedCouncil.length !== 4 && (
+                <strong style={{ color: selectedCouncil.length > 4 ? '#dc3545' : '#666', marginLeft: '8px' }}>
+                  ({selectedCouncil.length}/4 selected)
+                </strong>
+              )}
+              {selectedCouncil.length === 4 && (
+                <strong style={{ color: '#28a745', marginLeft: '8px' }}>
+                  ✓ ({selectedCouncil.length}/4 selected)
+                </strong>
+              )}
             </p>
             <div className="model-groups">
               {Object.entries(groupedModels).map(([provider, models]) => (
@@ -122,7 +141,7 @@ export default function Settings({ isOpen, onClose, councilModels, chairmanModel
             <button
               className="save-btn"
               onClick={handleSave}
-              disabled={selectedCouncil.length === 0}
+              disabled={selectedCouncil.length !== 4}
             >
               Save
             </button>
