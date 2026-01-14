@@ -1,29 +1,8 @@
 import { useState } from 'react';
 import './Settings.css';
+import { AVAILABLE_MODELS, DEFAULT_COUNCIL_MODELS, DEFAULT_CHAIRMAN_MODEL } from '../config/models.js';
 
-const AVAILABLE_MODELS = [
-  { id: 'openai/gpt-4o-mini', name: 'GPT-4o Mini', provider: 'OpenAI' },
-  { id: 'openai/gpt-4o', name: 'GPT-4o', provider: 'OpenAI' },
-  { id: 'openai/o1', name: 'O1', provider: 'OpenAI' },
-  { id: 'openai/o1-mini', name: 'O1 Mini', provider: 'OpenAI' },
-  { id: 'google/gemini-flash-1.5', name: 'Gemini 1.5 Flash', provider: 'Google' },
-  { id: 'google/gemini-pro-1.5', name: 'Gemini 1.5 Pro', provider: 'Google' },
-  { id: 'google/gemini-2.0-flash-exp', name: 'Gemini 2.0 Flash (Experimental)', provider: 'Google' },
-  { id: 'anthropic/claude-3-haiku', name: 'Claude 3 Haiku', provider: 'Anthropic' },
-  { id: 'anthropic/claude-3.5-sonnet', name: 'Claude 3.5 Sonnet', provider: 'Anthropic' },
-  { id: 'anthropic/claude-3-opus', name: 'Claude 3 Opus', provider: 'Anthropic' },
-  { id: 'x-ai/grok-beta', name: 'Grok Beta', provider: 'xAI' },
-  { id: 'deepseek/deepseek-chat', name: 'DeepSeek Chat', provider: 'DeepSeek' },
-];
-
-export const DEFAULT_COUNCIL_MODELS = [
-  'openai/gpt-4o-mini',
-  'google/gemini-flash-1.5',
-  'anthropic/claude-3-haiku',
-  'x-ai/grok-beta',
-];
-
-export const DEFAULT_CHAIRMAN_MODEL = 'openai/gpt-4o';
+export { DEFAULT_COUNCIL_MODELS, DEFAULT_CHAIRMAN_MODEL };
 
 export default function Settings({ isOpen, onClose, councilModels, chairmanModel, onSave }) {
   const [selectedCouncil, setSelectedCouncil] = useState(councilModels);
