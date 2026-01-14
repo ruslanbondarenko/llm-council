@@ -153,6 +153,9 @@ export const api = {
     console.log('Saving user message...');
     await this.saveUserMessage(conversationId, content);
 
+    console.log('Council Models being sent:', councilModels);
+    console.log('Chairman Model being sent:', chairmanModel);
+
     const edgeFunctionUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/council-deliberation`;
     console.log('Calling Edge Function:', edgeFunctionUrl);
 
