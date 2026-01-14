@@ -14,7 +14,25 @@ In a bit more detail, here is what happens when you submit a query:
 
 This project was 99% vibe coded as a fun Saturday hack because I wanted to explore and evaluate a number of LLMs side by side in the process of [reading books together with LLMs](https://x.com/karpathy/status/1990577951671509438). It's nice and useful to see multiple responses side by side, and also the cross-opinions of all LLMs on each other's outputs. I'm not going to support it in any way, it's provided here as is for other people's inspiration and I don't intend to improve it. Code is ephemeral now and libraries are over, ask your LLM to change it in whatever way you like.
 
-## Setup
+## Quick Start (bolt.new Deployment)
+
+This project is ready for immediate deployment on **bolt.new** with full HTTPS support!
+
+**Steps:**
+1. Deploy the project to bolt.new (the platform handles everything automatically)
+2. Your app will be live with a unique HTTPS URL
+3. All conversations are stored in Supabase PostgreSQL database
+4. The Edge Function handles all LLM orchestration via OpenRouter
+
+**What's included:**
+- Supabase database schema (already migrated)
+- Edge Function for 3-stage deliberation
+- React frontend with streaming UI
+- OpenRouter API integration for multiple LLMs
+
+The project structure has been optimized for bolt.new with all frontend files in the root directory.
+
+## Setup (Local Development)
 
 ### 1. Install Dependencies
 
@@ -27,9 +45,7 @@ uv sync
 
 **Frontend:**
 ```bash
-cd frontend
 npm install
-cd ..
 ```
 
 ### 2. Configure API Key
@@ -73,11 +89,12 @@ uv run python -m backend.main
 
 Terminal 2 (Frontend):
 ```bash
-cd frontend
 npm run dev
 ```
 
 Then open http://localhost:5173 in your browser.
+
+**Note**: For the serverless version, just run `npm run dev` - no Python backend needed!
 
 ## Tech Stack
 
