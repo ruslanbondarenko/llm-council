@@ -81,7 +81,35 @@ Then open http://localhost:5173 in your browser.
 
 ## Tech Stack
 
+### Serverless Version (Deployed)
+- **Backend:** Supabase Edge Functions (Deno runtime)
+- **Frontend:** React + Vite, react-markdown for rendering
+- **Database:** Supabase PostgreSQL with Row Level Security
+- **API:** OpenRouter for multi-model LLM access
+- **Package Management:** npm
+
+### Local Development Version (Legacy)
 - **Backend:** FastAPI (Python 3.10+), async httpx, OpenRouter API
 - **Frontend:** React + Vite, react-markdown for rendering
 - **Storage:** JSON files in `data/conversations/`
 - **Package Management:** uv for Python, npm for JavaScript
+
+## Deployment
+
+This application is deployed on **bolt.new** using a fully serverless architecture:
+
+1. **Frontend**: Static React app served from bolt.new
+2. **Backend**: Supabase Edge Function (`council-deliberation`) handles all LLM orchestration
+3. **Database**: Supabase PostgreSQL stores conversations and messages
+4. **Configuration**: Models are configured in the Edge Function code
+
+The deployed version uses the same 3-stage deliberation process but runs entirely on serverless infrastructure, making it easily scalable and cost-effective.
+
+**Live URL**: Your deployment will have a unique HTTPS URL provided by bolt.new
+
+### Architecture Benefits
+- No server maintenance required
+- Automatic HTTPS and SSL certificates
+- Global CDN distribution for the frontend
+- Scales automatically with usage
+- Cost-effective (pay only for actual usage)
