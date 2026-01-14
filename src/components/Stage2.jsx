@@ -1,121 +1,49 @@
 import { useState } from 'react';
-import ReactMarkdown from 'react-markdown';
 import './Stage2.css';
 
-function deAnonymizeText(text, labelToModel) {
-  if (!labelToModel) return text;
+export default function Stage2({ aggregateRankings }) {
+  const [isExpanded, setIsExpanded] = useState(false);
 
-  let result = text;
-  // Replace each "Response X" with the actual model name
-  Object.entries(labelToModel).forEach(([label, model]) => {
-    const modelShortName = model.split('/')[1] || model;
-    result = result.replace(new RegExp(label, 'g'), `**${modelShortName}**`);
-  });
-  return result;
-}
-
-export default function Stage2({ rankings, labelToModel, aggregateRankings, stage1Responses }) {
-  const [activeTab, setActiveTab] = useState(0);
-
-  if (!rankings || rankings.length === 0) {
+  if (!aggregateRankings || aggregateRankings.length === 0) {
     return null;
   }
-
-  // Find the original response from this model in stage1
-  const getCurrentModelResponse = () => {
-    if (!stage1Responses) return null;
-    const currentModel = rankings[activeTab].model;
-    return stage1Responses.find(resp => resp.model === currentModel);
-  };
-
-  const currentModelResponse = getCurrentModelResponse();
 
   return (
     <div className="stage stage2">
       <h3 className="stage-title">Stage 2: Peer Rankings</h3>
 
-      <h4>Raw Evaluations</h4>
-      <p className="stage-description">
-        Each model evaluated all responses (anonymized as Response A, B, C, etc.) and provided rankings.
-        Below, model names are shown in <strong>bold</strong> for readability, but the original evaluation used anonymous labels.
-      </p>
+      <div className="aggregate-rankings">
+        <button
+          className="details-toggle"
+          onClick={() => setIsExpanded(!isExpanded)}
+        >
+          {isExpanded ? '▼' : '▶'} Aggregate Rankings (Street Cred)
+        </button>
 
-      <div className="tabs">
-        {rankings.map((rank, index) => (
-          <button
-            key={index}
-            className={`tab ${activeTab === index ? 'active' : ''}`}
-            onClick={() => setActiveTab(index)}
-          >
-            {rank.model.split('/')[1] || rank.model}
-          </button>
-        ))}
-      </div>
-
-      <div className="tab-content">
-        <div className="ranking-model">
-          {rankings[activeTab].model}
-        </div>
-
-        {/* Show original response from this model first */}
-        {currentModelResponse && (
-          <div className="original-response">
-            <h4>Original Response from {rankings[activeTab].model.split('/')[1] || rankings[activeTab].model}</h4>
-            <div className="markdown-content">
-              <ReactMarkdown>{currentModelResponse.content}</ReactMarkdown>
+        {isExpanded && (
+          <div className="aggregate-content">
+            <p className="stage-description">
+              Combined results across all peer evaluations (lower score is better):
+            </p>
+            <div className="aggregate-list">
+              {aggregateRankings.map((agg, index) => (
+                <div key={index} className="aggregate-item">
+                  <span className="rank-position">#{index + 1}</span>
+                  <span className="rank-model">
+                    {agg.model.split('/')[1] || agg.model}
+                  </span>
+                  <span className="rank-score">
+                    Avg: {agg.average_rank.toFixed(2)}
+                  </span>
+                  <span className="rank-count">
+                    ({agg.rankings_count} votes)
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
         )}
-
-        {/* Then show ranking evaluation */}
-        <h4>Evaluation of Other Responses</h4>
-        <div className="ranking-content markdown-content">
-          <ReactMarkdown>
-            {deAnonymizeText(rankings[activeTab].ranking, labelToModel)}
-          </ReactMarkdown>
-        </div>
-
-        {rankings[activeTab].parsed_ranking &&
-         rankings[activeTab].parsed_ranking.length > 0 && (
-          <div className="parsed-ranking">
-            <strong>Extracted Ranking:</strong>
-            <ol>
-              {rankings[activeTab].parsed_ranking.map((label, i) => (
-                <li key={i}>
-                  {labelToModel && labelToModel[label]
-                    ? labelToModel[label].split('/')[1] || labelToModel[label]
-                    : label}
-                </li>
-              ))}
-            </ol>
-          </div>
-        )}
       </div>
-
-      {aggregateRankings && aggregateRankings.length > 0 && (
-        <div className="aggregate-rankings">
-          <h4>Aggregate Rankings (Street Cred)</h4>
-          <p className="stage-description">
-            Combined results across all peer evaluations (lower score is better):
-          </p>
-          <div className="aggregate-list">
-            {aggregateRankings.map((agg, index) => (
-              <div key={index} className="aggregate-item">
-                <span className="rank-position">#{index + 1}</span>
-                <span className="rank-model">
-                  {agg.model.split('/')[1] || agg.model}
-                </span>
-                <span className="rank-score">
-                  Avg: {agg.average_rank.toFixed(2)}
-                </span>
-                <span className="rank-count">
-                  ({agg.rankings_count} votes)
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 }

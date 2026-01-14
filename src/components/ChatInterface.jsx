@@ -94,12 +94,9 @@ export default function ChatInterface({
                       <span>Running Stage 2: Peer rankings...</span>
                     </div>
                   )}
-                  {msg.stage2 && (
+                  {msg.stage2 && msg.metadata?.aggregate_rankings && (
                     <Stage2
-                      rankings={msg.stage2}
-                      labelToModel={msg.metadata?.label_to_model}
                       aggregateRankings={msg.metadata?.aggregate_rankings}
-                      stage1Responses={msg.stage1}
                     />
                   )}
 
