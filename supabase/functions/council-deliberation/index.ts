@@ -8,12 +8,12 @@ const corsHeaders = {
 
 const DEFAULT_COUNCIL_MODELS = [
   "openai/gpt-4o-mini",
-  "google/gemini-2.5-flash",
-  "anthropic/claude-haiku-4.5",
-  "x-ai/grok-4.1-fast",
+  "google/gemini-flash-1.5",
+  "anthropic/claude-3-haiku",
+  "meta-llama/llama-3.1-8b-instruct",
 ];
 
-const DEFAULT_CHAIRMAN_MODEL = "openai/gpt-5.1";
+const DEFAULT_CHAIRMAN_MODEL = "openai/gpt-4o";
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
 
 interface Message {
@@ -70,7 +70,8 @@ async function queryModel(
     clearTimeout(timeoutId);
 
     if (!response.ok) {
-      console.error(`Error querying model ${model}: ${response.statusText}`);
+      const errorText = await response.text();
+      console.error(`Error querying model ${model}: ${response.status} ${response.statusText}`, errorText);
       return null;
     }
 
@@ -164,19 +165,24 @@ async function stage1CollectResponses(
   userQuery: string,
   councilModels: string[]
 ): Promise<Stage1Result[]> {
+  console.log("Stage 1: Querying models:", councilModels);
   const messages = [{ role: "user", content: userQuery }];
   const responses = await queryModelsParallel(apiKey, councilModels, messages);
   
   const results: Stage1Result[] = [];
   for (const [model, response] of Object.entries(responses)) {
     if (response?.content) {
+      console.log(`Stage 1: ${model} responded with ${response.content.length} chars`);
       results.push({
         model,
         response: response.content,
       });
+    } else {
+      console.error(`Stage 1: ${model} failed to respond`);
     }
   }
   
+  console.log(`Stage 1: ${results.length}/${councilModels.length} models responded`);
   return results;
 }
 
@@ -192,6 +198,8 @@ async function stage2CollectRankings(
   labels.forEach((label, i) => {
     labelToModel[`Response ${label}`] = stage1Results[i].model;
   });
+  
+  console.log("Stage 2: Label to model mapping:", labelToModel);
   
   const responsesText = stage1Results
     .map((result, i) => `Response ${labels[i]}:\n${result.response}`)
@@ -236,11 +244,14 @@ Now provide your evaluation and ranking:`;
     if (response?.content) {
       const fullText = response.content;
       const parsed = parseRankingFromText(fullText);
+      console.log(`Stage 2: ${model} ranking parsed: ${parsed.join(", ")}`);
       rankings.push({
         model,
         ranking: fullText,
         parsed_ranking: parsed,
       });
+    } else {
+      console.error(`Stage 2: ${model} failed to respond`);
     }
   }
   
@@ -254,6 +265,8 @@ async function stage3SynthesizeFinal(
   stage2Results: Stage2Result[],
   chairmanModel: string
 ): Promise<Stage3Result> {
+  console.log("Stage 3: Chairman model:", chairmanModel);
+  
   const stage1Text = stage1Results
     .map((r) => `Model: ${r.model}\nResponse: ${r.response}`)
     .join("\n\n");
@@ -283,12 +296,14 @@ Provide a clear, well-reasoned final answer that represents the council's collec
   const response = await queryModel(apiKey, chairmanModel, messages);
 
   if (!response?.content) {
+    console.error("Stage 3: Chairman failed to respond");
     return {
       model: chairmanModel,
       response: "Error: Unable to generate final synthesis.",
     };
   }
 
+  console.log(`Stage 3: Chairman responded with ${response.content.length} chars`);
   return {
     model: chairmanModel,
     response: response.content,
@@ -322,6 +337,11 @@ Deno.serve(async (req: Request) => {
     const models = councilModels && councilModels.length > 0 ? councilModels : DEFAULT_COUNCIL_MODELS;
     const chairman = chairmanModel || DEFAULT_CHAIRMAN_MODEL;
 
+    console.log("=== NEW REQUEST ===");
+    console.log("User query:", userQuery.substring(0, 100));
+    console.log("Council models:", models);
+    console.log("Chairman model:", chairman);
+
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
       async start(controller) {
@@ -331,6 +351,7 @@ Deno.serve(async (req: Request) => {
           const stage1Results = await stage1CollectResponses(apiKey, userQuery, models);
           
           if (stage1Results.length === 0) {
+            console.error("All models failed in Stage 1");
             controller.enqueue(
               encoder.encode(
                 `event: error\ndata: ${JSON.stringify({ message: "All models failed to respond" })}\n\n`
@@ -383,6 +404,7 @@ Deno.serve(async (req: Request) => {
           );
 
           controller.enqueue(encoder.encode(`event: complete\ndata: {}\n\n`));
+          console.log("=== REQUEST COMPLETE ===");
           controller.close();
         } catch (error) {
           console.error("Stream error:", error);
