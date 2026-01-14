@@ -58,7 +58,7 @@ function App() {
   };
 
   const handleSendMessage = async (content) => {
-    if (!currentConversationId) return;
+    if (!currentConversationId || !currentConversation) return;
 
     setIsLoading(true);
     try {
@@ -66,7 +66,7 @@ function App() {
       const userMessage = { role: 'user', content };
       setCurrentConversation((prev) => ({
         ...prev,
-        messages: [...prev.messages, userMessage],
+        messages: [...(prev?.messages || []), userMessage],
       }));
 
       // Create a partial assistant message that will be updated progressively
@@ -86,7 +86,7 @@ function App() {
       // Add the partial assistant message
       setCurrentConversation((prev) => ({
         ...prev,
-        messages: [...prev.messages, assistantMessage],
+        messages: [...(prev?.messages || []), assistantMessage],
       }));
 
       // Send message with streaming
@@ -94,58 +94,82 @@ function App() {
         switch (eventType) {
           case 'stage1_start':
             setCurrentConversation((prev) => {
+              if (!prev) return prev;
               const messages = [...prev.messages];
               const lastMsg = messages[messages.length - 1];
-              lastMsg.loading.stage1 = true;
+              if (lastMsg && lastMsg.loading) {
+                lastMsg.loading.stage1 = true;
+              }
               return { ...prev, messages };
             });
             break;
 
           case 'stage1_complete':
             setCurrentConversation((prev) => {
+              if (!prev) return prev;
               const messages = [...prev.messages];
               const lastMsg = messages[messages.length - 1];
-              lastMsg.stage1 = event.data;
-              lastMsg.loading.stage1 = false;
+              if (lastMsg) {
+                lastMsg.stage1 = event.data;
+                if (lastMsg.loading) {
+                  lastMsg.loading.stage1 = false;
+                }
+              }
               return { ...prev, messages };
             });
             break;
 
           case 'stage2_start':
             setCurrentConversation((prev) => {
+              if (!prev) return prev;
               const messages = [...prev.messages];
               const lastMsg = messages[messages.length - 1];
-              lastMsg.loading.stage2 = true;
+              if (lastMsg && lastMsg.loading) {
+                lastMsg.loading.stage2 = true;
+              }
               return { ...prev, messages };
             });
             break;
 
           case 'stage2_complete':
             setCurrentConversation((prev) => {
+              if (!prev) return prev;
               const messages = [...prev.messages];
               const lastMsg = messages[messages.length - 1];
-              lastMsg.stage2 = event.data;
-              lastMsg.metadata = event.metadata;
-              lastMsg.loading.stage2 = false;
+              if (lastMsg) {
+                lastMsg.stage2 = event.data;
+                lastMsg.metadata = event.metadata;
+                if (lastMsg.loading) {
+                  lastMsg.loading.stage2 = false;
+                }
+              }
               return { ...prev, messages };
             });
             break;
 
           case 'stage3_start':
             setCurrentConversation((prev) => {
+              if (!prev) return prev;
               const messages = [...prev.messages];
               const lastMsg = messages[messages.length - 1];
-              lastMsg.loading.stage3 = true;
+              if (lastMsg && lastMsg.loading) {
+                lastMsg.loading.stage3 = true;
+              }
               return { ...prev, messages };
             });
             break;
 
           case 'stage3_complete':
             setCurrentConversation((prev) => {
+              if (!prev) return prev;
               const messages = [...prev.messages];
               const lastMsg = messages[messages.length - 1];
-              lastMsg.stage3 = event.data;
-              lastMsg.loading.stage3 = false;
+              if (lastMsg) {
+                lastMsg.stage3 = event.data;
+                if (lastMsg.loading) {
+                  lastMsg.loading.stage3 = false;
+                }
+              }
               return { ...prev, messages };
             });
             break;
@@ -163,6 +187,16 @@ function App() {
 
           case 'error':
             console.error('Stream error:', event.message);
+            setCurrentConversation((prev) => {
+              if (!prev) return prev;
+              const messages = [...prev.messages];
+              const lastMsg = messages[messages.length - 1];
+              if (lastMsg && lastMsg.role === 'assistant') {
+                lastMsg.stage3 = `Error: ${event.message || 'Failed to process request. Please try again.'}`;
+                lastMsg.loading = { stage1: false, stage2: false, stage3: false };
+              }
+              return { ...prev, messages };
+            });
             setIsLoading(false);
             break;
 
@@ -172,11 +206,17 @@ function App() {
       });
     } catch (error) {
       console.error('Failed to send message:', error);
-      // Remove optimistic messages on error
-      setCurrentConversation((prev) => ({
-        ...prev,
-        messages: prev.messages.slice(0, -2),
-      }));
+      // Show error message instead of removing messages
+      setCurrentConversation((prev) => {
+        if (!prev) return prev;
+        const messages = [...prev.messages];
+        const lastMsg = messages[messages.length - 1];
+        if (lastMsg && lastMsg.role === 'assistant') {
+          lastMsg.stage3 = `Error: ${error.message || 'Failed to send message. Please try again.'}`;
+          lastMsg.loading = { stage1: false, stage2: false, stage3: false };
+        }
+        return { ...prev, messages };
+      });
       setIsLoading(false);
     }
   };
