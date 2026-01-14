@@ -224,8 +224,8 @@ export const api = {
               } else if (eventType === 'stage3_start') {
                 onEvent(eventType, eventData);
               } else if (eventType === 'stage3_complete') {
-                stage3Data = eventData.response;
-                onEvent(eventType, { data: eventData.response });
+                stage3Data = eventData;
+                onEvent(eventType, { data: eventData });
               } else if (eventType === 'complete') {
                 await this.saveAssistantMessage(
                   conversationId,
