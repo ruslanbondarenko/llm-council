@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import './Stage1.css';
 
 function deAnonymizeText(text, labelToModel) {
@@ -62,7 +63,7 @@ export default function Stage1({ responses, rankings, labelToModel }) {
       <div className="tab-content">
         <div className="model-name">{responses[activeTab].model || 'Unknown Model'}</div>
         <div className="response-text markdown-content">
-          <ReactMarkdown>{responses[activeTab].response || ''}</ReactMarkdown>
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>{responses[activeTab].response || ''}</ReactMarkdown>
         </div>
 
         {currentRanking && (
@@ -82,7 +83,7 @@ export default function Stage1({ responses, rankings, labelToModel }) {
                   Модель получила ответы в анонимном виде (Response A, B, C и т.д.).
                 </p>
                 <div className="ranking-evaluation markdown-content">
-                  <ReactMarkdown>
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
                     {deAnonymizeText(currentRanking.ranking, labelToModel)}
                   </ReactMarkdown>
                 </div>

@@ -1,4 +1,5 @@
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import './Stage3.css';
 
 export default function Stage3({ finalResponse }) {
@@ -35,7 +36,7 @@ export default function Stage3({ finalResponse }) {
           </div>
         )}
         <div className="final-text markdown-content">
-          <ReactMarkdown>{responseText}</ReactMarkdown>
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>{responseText}</ReactMarkdown>
         </div>
       </div>
     </div>
