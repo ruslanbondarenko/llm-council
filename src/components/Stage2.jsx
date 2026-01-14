@@ -5,7 +5,12 @@ export default function Stage2({ aggregateRankings }) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   if (!aggregateRankings || aggregateRankings.length === 0) {
-    return null;
+    return (
+      <div className="stage stage2">
+        <h3 className="stage-title">Stage 2: Peer Rankings</h3>
+        <p className="stage-description">Calculating aggregate rankings...</p>
+      </div>
+    );
   }
 
   return (

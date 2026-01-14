@@ -21,6 +21,12 @@ export default function Stage1({ responses, rankings, labelToModel }) {
     return null;
   }
 
+  console.log('Stage1 props:', {
+    responsesCount: responses?.length,
+    rankingsCount: rankings?.length,
+    hasLabelToModel: !!labelToModel
+  });
+
   const toggleDetails = (modelName) => {
     setShowDetails(prev => ({
       ...prev,
