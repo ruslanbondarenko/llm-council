@@ -166,31 +166,43 @@ export const api = {
     let stage3Data = null;
     let metadata = null;
 
+    let buffer = '';
+
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
 
-      const chunk = decoder.decode(value);
-      const lines = chunk.split('\n');
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
 
-      for (const line of lines) {
+      buffer = lines.pop() || '';
+
+      let i = 0;
+      while (i < lines.length) {
+        const line = lines[i];
+
         if (line.startsWith('event: ')) {
           const eventType = line.slice(7).trim();
-          const nextLineIndex = lines.indexOf(line) + 1;
 
-          if (nextLineIndex < lines.length && lines[nextLineIndex].startsWith('data: ')) {
-            const dataLine = lines[nextLineIndex].slice(6);
+          if (i + 1 < lines.length && lines[i + 1].startsWith('data: ')) {
+            const dataLine = lines[i + 1].slice(6);
 
             try {
-              const eventData = JSON.parse(dataLine);
+              const eventData = dataLine ? JSON.parse(dataLine) : {};
 
-              if (eventType === 'stage1_complete') {
+              if (eventType === 'stage1_start') {
+                onEvent(eventType, eventData);
+              } else if (eventType === 'stage1_complete') {
                 stage1Data = eventData;
                 onEvent(eventType, { data: eventData });
+              } else if (eventType === 'stage2_start') {
+                onEvent(eventType, eventData);
               } else if (eventType === 'stage2_complete') {
                 stage2Data = eventData.rankings;
                 metadata = eventData.metadata;
                 onEvent(eventType, { data: eventData.rankings, metadata: eventData.metadata });
+              } else if (eventType === 'stage3_start') {
+                onEvent(eventType, eventData);
               } else if (eventType === 'stage3_complete') {
                 stage3Data = eventData.response;
                 onEvent(eventType, { data: eventData.response });
@@ -210,13 +222,19 @@ export const api = {
                 }
 
                 onEvent(eventType, eventData);
-              } else {
+              } else if (eventType === 'error') {
                 onEvent(eventType, eventData);
               }
             } catch (e) {
               console.error('Failed to parse SSE event:', e, dataLine);
             }
+
+            i += 2;
+          } else {
+            i++;
           }
+        } else {
+          i++;
         }
       }
     }
