@@ -6,17 +6,30 @@ export default function Stage3({ finalResponse }) {
     return null;
   }
 
-  const isString = typeof finalResponse === 'string';
-  const modelName = !isString && finalResponse.model
-    ? (finalResponse.model.split('/')[1] || finalResponse.model)
+  let data = finalResponse;
+
+  if (typeof finalResponse === 'string') {
+    try {
+      const parsed = JSON.parse(finalResponse);
+      if (parsed && typeof parsed === 'object' && 'response' in parsed) {
+        data = parsed;
+      }
+    } catch (e) {
+      data = finalResponse;
+    }
+  }
+
+  const isObject = typeof data === 'object' && data !== null;
+  const modelName = isObject && data.model
+    ? (data.model.split('/')[1] || data.model)
     : 'Unknown';
-  const responseText = isString ? finalResponse : (finalResponse.response || '');
+  const responseText = isObject ? (data.response || '') : data;
 
   return (
     <div className="stage stage3">
       <h3 className="stage-title">Stage 3: Final Council Answer</h3>
       <div className="final-response">
-        {!isString && (
+        {isObject && data.model && (
           <div className="chairman-label">
             Chairman: {modelName}
           </div>
