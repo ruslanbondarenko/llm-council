@@ -1,6 +1,6 @@
 import { supabase } from './supabase.js';
 
-const OPENROUTER_API_KEY = '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';
+const OPENROUTER_API_KEY = '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';
 
 function getSessionId() {
   let sessionId = localStorage.getItem('llm_council_session_id');
