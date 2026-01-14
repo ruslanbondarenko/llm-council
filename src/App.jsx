@@ -135,7 +135,10 @@ function App() {
               const messages = [...prev.messages];
               const lastMsg = messages[messages.length - 1];
               if (lastMsg && lastMsg.loading) {
-                lastMsg.loading.stage1 = true;
+                messages[messages.length - 1] = {
+                  ...lastMsg,
+                  loading: { ...lastMsg.loading, stage1: true },
+                };
               }
               return { ...prev, messages };
             });
@@ -147,10 +150,11 @@ function App() {
               const messages = [...prev.messages];
               const lastMsg = messages[messages.length - 1];
               if (lastMsg) {
-                lastMsg.stage1 = event.data;
-                if (lastMsg.loading) {
-                  lastMsg.loading.stage1 = false;
-                }
+                messages[messages.length - 1] = {
+                  ...lastMsg,
+                  stage1: event.data,
+                  loading: { ...lastMsg.loading, stage1: false },
+                };
               }
               return { ...prev, messages };
             });
@@ -162,7 +166,10 @@ function App() {
               const messages = [...prev.messages];
               const lastMsg = messages[messages.length - 1];
               if (lastMsg && lastMsg.loading) {
-                lastMsg.loading.stage2 = true;
+                messages[messages.length - 1] = {
+                  ...lastMsg,
+                  loading: { ...lastMsg.loading, stage2: true },
+                };
               }
               return { ...prev, messages };
             });
@@ -174,11 +181,12 @@ function App() {
               const messages = [...prev.messages];
               const lastMsg = messages[messages.length - 1];
               if (lastMsg) {
-                lastMsg.stage2 = event.data;
-                lastMsg.metadata = event.metadata;
-                if (lastMsg.loading) {
-                  lastMsg.loading.stage2 = false;
-                }
+                messages[messages.length - 1] = {
+                  ...lastMsg,
+                  stage2: event.data,
+                  metadata: event.metadata,
+                  loading: { ...lastMsg.loading, stage2: false },
+                };
               }
               return { ...prev, messages };
             });
@@ -190,7 +198,10 @@ function App() {
               const messages = [...prev.messages];
               const lastMsg = messages[messages.length - 1];
               if (lastMsg && lastMsg.loading) {
-                lastMsg.loading.stage3 = true;
+                messages[messages.length - 1] = {
+                  ...lastMsg,
+                  loading: { ...lastMsg.loading, stage3: true },
+                };
               }
               return { ...prev, messages };
             });
@@ -202,10 +213,11 @@ function App() {
               const messages = [...prev.messages];
               const lastMsg = messages[messages.length - 1];
               if (lastMsg) {
-                lastMsg.stage3 = event.data;
-                if (lastMsg.loading) {
-                  lastMsg.loading.stage3 = false;
-                }
+                messages[messages.length - 1] = {
+                  ...lastMsg,
+                  stage3: event.data,
+                  loading: { ...lastMsg.loading, stage3: false },
+                };
               }
               return { ...prev, messages };
             });
