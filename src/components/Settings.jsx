@@ -5,7 +5,17 @@ import { AVAILABLE_MODELS, DEFAULT_COUNCIL_MODELS, DEFAULT_CHAIRMAN_MODEL } from
 export { DEFAULT_COUNCIL_MODELS, DEFAULT_CHAIRMAN_MODEL };
 
 export default function Settings({ isOpen, onClose, councilModels, chairmanModel, onSave }) {
-  const [selectedCouncil, setSelectedCouncil] = useState(councilModels);
+  const initializeSlots = (models) => {
+    return models.map(modelId => {
+      const model = AVAILABLE_MODELS.find(m => m.id === modelId);
+      return {
+        provider: model?.provider || '',
+        modelId: modelId
+      };
+    });
+  };
+
+  const [councilSlots, setCouncilSlots] = useState(() => initializeSlots(councilModels));
   const [selectedChairman, setSelectedChairman] = useState(chairmanModel);
   const [apiKey, setApiKey] = useState(() => {
     return localStorage.getItem('openrouter_api_key') || '';
@@ -13,43 +23,55 @@ export default function Settings({ isOpen, onClose, councilModels, chairmanModel
 
   if (!isOpen) return null;
 
-  const handleCouncilToggle = (modelId) => {
-    setSelectedCouncil((prev) => {
-      const clickedModel = AVAILABLE_MODELS.find((m) => m.id === modelId);
-      if (!clickedModel) return prev;
+  const providers = [...new Set(AVAILABLE_MODELS.map(m => m.provider))];
 
-      const otherModelsFromProvider = AVAILABLE_MODELS
-        .filter((m) => m.provider === clickedModel.provider && m.id !== modelId)
-        .map((m) => m.id);
+  const getAvailableProviders = (slotIndex) => {
+    const usedProviders = councilSlots
+      .map((slot, idx) => idx !== slotIndex ? slot.provider : null)
+      .filter(p => p);
+    return providers.filter(p => !usedProviders.includes(p));
+  };
 
-      const newSelection = prev.filter((id) => !otherModelsFromProvider.includes(id));
+  const getModelsForProvider = (provider) => {
+    return AVAILABLE_MODELS.filter(m => m.provider === provider);
+  };
 
-      if (prev.includes(modelId)) {
-        return newSelection.filter((id) => id !== modelId);
-      } else {
-        return [...newSelection.filter((id) => id !== modelId), modelId];
-      }
+  const handleProviderChange = (slotIndex, newProvider) => {
+    setCouncilSlots(prev => {
+      const newSlots = [...prev];
+      const modelsForProvider = getModelsForProvider(newProvider);
+      newSlots[slotIndex] = {
+        provider: newProvider,
+        modelId: modelsForProvider[0]?.id || ''
+      };
+      return newSlots;
+    });
+  };
+
+  const handleModelChange = (slotIndex, newModelId) => {
+    setCouncilSlots(prev => {
+      const newSlots = [...prev];
+      newSlots[slotIndex] = {
+        ...newSlots[slotIndex],
+        modelId: newModelId
+      };
+      return newSlots;
     });
   };
 
   const handleSave = () => {
     localStorage.setItem('openrouter_api_key', apiKey);
-    onSave(selectedCouncil, selectedChairman);
+    const selectedModels = councilSlots.map(slot => slot.modelId);
+    onSave(selectedModels, selectedChairman);
     onClose();
   };
 
   const handleReset = () => {
-    setSelectedCouncil(DEFAULT_COUNCIL_MODELS);
+    setCouncilSlots(initializeSlots(DEFAULT_COUNCIL_MODELS));
     setSelectedChairman(DEFAULT_CHAIRMAN_MODEL);
   };
 
-  const groupedModels = AVAILABLE_MODELS.reduce((acc, model) => {
-    if (!acc[model.provider]) {
-      acc[model.provider] = [];
-    }
-    acc[model.provider].push(model);
-    return acc;
-  }, {});
+  const isValidSelection = councilSlots.every(slot => slot.provider && slot.modelId);
 
   return (
     <div className="settings-overlay" onClick={onClose}>
@@ -80,32 +102,36 @@ export default function Settings({ isOpen, onClose, councilModels, chairmanModel
           <section className="settings-section">
             <h3>Council Models (Stage 1 & 2)</h3>
             <p className="settings-description">
-              Select one model from each provider. Exactly 4 models must be selected (one per provider).
-              {selectedCouncil.length !== 4 && (
-                <strong style={{ color: selectedCouncil.length > 4 ? '#dc3545' : '#666', marginLeft: '8px' }}>
-                  ({selectedCouncil.length}/4 selected)
-                </strong>
-              )}
-              {selectedCouncil.length === 4 && (
-                <strong style={{ color: '#28a745', marginLeft: '8px' }}>
-                  ✓ ({selectedCouncil.length}/4 selected)
-                </strong>
-              )}
+              Select one model from each provider. Exactly 4 models must be selected.
             </p>
-            <div className="model-groups">
-              {Object.entries(groupedModels).map(([provider, models]) => (
-                <div key={provider} className="model-group">
-                  <h4>{provider}</h4>
-                  {models.map((model) => (
-                    <label key={model.id} className="model-checkbox">
-                      <input
-                        type="checkbox"
-                        checked={selectedCouncil.includes(model.id)}
-                        onChange={() => handleCouncilToggle(model.id)}
-                      />
-                      <span>{model.name}</span>
-                    </label>
-                  ))}
+            <div className="council-slots">
+              {councilSlots.map((slot, index) => (
+                <div key={index} className="council-slot">
+                  <span className="slot-number">{index + 1}.</span>
+                  <select
+                    value={slot.provider}
+                    onChange={(e) => handleProviderChange(index, e.target.value)}
+                    className="provider-select"
+                  >
+                    <option value="">Select Provider</option>
+                    {slot.provider && !getAvailableProviders(index).includes(slot.provider) && (
+                      <option value={slot.provider}>{slot.provider}</option>
+                    )}
+                    {getAvailableProviders(index).map(provider => (
+                      <option key={provider} value={provider}>{provider}</option>
+                    ))}
+                  </select>
+                  <select
+                    value={slot.modelId}
+                    onChange={(e) => handleModelChange(index, e.target.value)}
+                    className="model-select"
+                    disabled={!slot.provider}
+                  >
+                    <option value="">Select Model</option>
+                    {slot.provider && getModelsForProvider(slot.provider).map(model => (
+                      <option key={model.id} value={model.id}>{model.name}</option>
+                    ))}
+                  </select>
                 </div>
               ))}
             </div>
@@ -141,7 +167,7 @@ export default function Settings({ isOpen, onClose, councilModels, chairmanModel
             <button
               className="save-btn"
               onClick={handleSave}
-              disabled={selectedCouncil.length !== 4}
+              disabled={!isValidSelection}
             >
               Save
             </button>

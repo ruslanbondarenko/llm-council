@@ -107,38 +107,57 @@
   color: #9ca3af;
 }
 
-.model-groups {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 24px;
+.council-slots {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.model-group h4 {
-  margin: 0 0 12px 0;
-  font-size: 0.875rem;
-  color: #4a90e2;
-  font-weight: 600;
-}
-
-.model-checkbox {
+.council-slot {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 0;
-  cursor: pointer;
+  gap: 12px;
+}
+
+.slot-number {
   font-size: 0.875rem;
-  color: #374151;
+  font-weight: 600;
+  color: #6b7280;
+  min-width: 20px;
 }
 
-.model-checkbox input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
-  accent-color: #4a90e2;
-  cursor: pointer;
-}
-
-.model-checkbox:hover {
+.provider-select,
+.model-select {
+  padding: 10px 12px;
+  font-size: 0.875rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #fff;
   color: #1f2937;
+  cursor: pointer;
+  flex: 1;
+}
+
+.provider-select {
+  max-width: 160px;
+}
+
+.model-select {
+  flex: 2;
+}
+
+.provider-select:focus,
+.model-select:focus {
+  outline: none;
+  border-color: #4a90e2;
+  box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+}
+
+.provider-select:disabled,
+.model-select:disabled {
+  background: #f3f4f6;
+  color: #9ca3af;
+  cursor: not-allowed;
 }
 
 .chairman-select {
