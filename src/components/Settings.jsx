@@ -4,24 +4,24 @@ import './Settings.css';
 const AVAILABLE_MODELS = [
   { id: 'openai/gpt-4o-mini', name: 'GPT-4o Mini', provider: 'OpenAI' },
   { id: 'openai/gpt-4o', name: 'GPT-4o', provider: 'OpenAI' },
-  { id: 'google/gemini-flash-1.5', name: 'Gemini Flash 1.5', provider: 'Google' },
-  { id: 'google/gemini-pro-1.5', name: 'Gemini Pro 1.5', provider: 'Google' },
-  { id: 'anthropic/claude-3-haiku', name: 'Claude 3 Haiku', provider: 'Anthropic' },
-  { id: 'anthropic/claude-3.5-sonnet', name: 'Claude 3.5 Sonnet', provider: 'Anthropic' },
-  { id: 'anthropic/claude-3-opus', name: 'Claude 3 Opus', provider: 'Anthropic' },
-  { id: 'x-ai/grok-beta', name: 'Grok Beta', provider: 'xAI' },
-  { id: 'meta-llama/llama-3.1-8b-instruct', name: 'Llama 3.1 8B', provider: 'Meta' },
-  { id: 'meta-llama/llama-3.1-70b-instruct', name: 'Llama 3.1 70B', provider: 'Meta' },
+  { id: 'openai/gpt-5.1', name: 'GPT-5.1', provider: 'OpenAI' },
+  { id: 'google/gemini-2.5-flash', name: 'Gemini 2.5 Flash', provider: 'Google' },
+  { id: 'google/gemini-2.5-pro', name: 'Gemini 2.5 Pro', provider: 'Google' },
+  { id: 'anthropic/claude-haiku-4.5', name: 'Claude Haiku 4.5', provider: 'Anthropic' },
+  { id: 'anthropic/claude-sonnet-4.5', name: 'Claude Sonnet 4.5', provider: 'Anthropic' },
+  { id: 'anthropic/claude-opus-4.5', name: 'Claude Opus 4.5', provider: 'Anthropic' },
+  { id: 'x-ai/grok-4.1-fast', name: 'Grok 4.1 Fast', provider: 'xAI' },
+  { id: 'x-ai/grok-4', name: 'Grok 4', provider: 'xAI' },
 ];
 
 export const DEFAULT_COUNCIL_MODELS = [
   'openai/gpt-4o-mini',
-  'google/gemini-flash-1.5',
-  'anthropic/claude-3-haiku',
-  'meta-llama/llama-3.1-8b-instruct',
+  'google/gemini-2.5-flash',
+  'anthropic/claude-haiku-4.5',
+  'x-ai/grok-4.1-fast',
 ];
 
-export const DEFAULT_CHAIRMAN_MODEL = 'openai/gpt-4o';
+export const DEFAULT_CHAIRMAN_MODEL = 'openai/gpt-5.1';
 
 export default function Settings({ isOpen, onClose, councilModels, chairmanModel, onSave }) {
   const [selectedCouncil, setSelectedCouncil] = useState(councilModels);
