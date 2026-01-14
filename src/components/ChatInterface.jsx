@@ -97,16 +97,11 @@ export default function ChatInterface({
                       <span>Running Stage 2: Peer rankings...</span>
                     </div>
                   )}
-                  {msg.stage2 && (() => {
-                    console.log('Rendering Stage2. msg.stage2:', msg.stage2);
-                    console.log('Rendering Stage2. msg.metadata:', msg.metadata);
-                    console.log('Rendering Stage2. aggregate_rankings:', msg.metadata?.aggregate_rankings);
-                    return (
-                      <Stage2
-                        aggregateRankings={msg.metadata?.aggregate_rankings}
-                      />
-                    );
-                  })()}
+                  {msg.stage2 && (
+                    <Stage2
+                      aggregateRankings={msg.metadata?.aggregate_rankings}
+                    />
+                  )}
 
                   {/* Stage 3 */}
                   {!msg.stage3 && msg.loading?.stage3 && (
