@@ -76,13 +76,23 @@ export default function ChatInterface({
                   <div className="message-label">LLM Council</div>
 
                   {/* Stage 1 */}
-                  {!msg.stage1 && msg.loading?.stage1 && (
+                  {(() => {
+                    console.log('Rendering Stage 1:', {
+                      hasStage1: !!msg.stage1,
+                      stage1Length: msg.stage1?.length,
+                      isLoading: msg.loading?.stage1,
+                      showLoading: (!msg.stage1 || msg.stage1.length === 0) && msg.loading?.stage1,
+                      showStage1: msg.stage1 && msg.stage1.length > 0
+                    });
+                    return null;
+                  })()}
+                  {(!msg.stage1 || msg.stage1.length === 0) && msg.loading?.stage1 && (
                     <div className="stage-loading">
                       <div className="spinner"></div>
                       <span>Running Stage 1: Collecting individual responses...</span>
                     </div>
                   )}
-                  {msg.stage1 && (
+                  {msg.stage1 && msg.stage1.length > 0 && (
                     <Stage1
                       responses={msg.stage1}
                       rankings={msg.stage2}
@@ -91,14 +101,27 @@ export default function ChatInterface({
                   )}
 
                   {/* Stage 2 */}
-                  {!msg.stage2 && msg.loading?.stage2 && (
+                  {(() => {
+                    console.log('Rendering Stage 2:', {
+                      hasStage2: !!msg.stage2,
+                      stage2Length: msg.stage2?.length,
+                      hasMetadata: !!msg.metadata,
+                      aggregateLength: msg.metadata?.aggregate_rankings?.length,
+                      isLoading: msg.loading?.stage2,
+                      showLoading: (!msg.stage2 || msg.stage2.length === 0) && msg.loading?.stage2,
+                      showStage2: msg.stage2 && msg.stage2.length > 0
+                    });
+                    return null;
+                  })()}
+                  {(!msg.stage2 || msg.stage2.length === 0) && msg.loading?.stage2 && (
                     <div className="stage-loading">
                       <div className="spinner"></div>
                       <span>Running Stage 2: Peer rankings...</span>
                     </div>
                   )}
-                  {msg.stage2 && (
+                  {msg.stage2 && msg.stage2.length > 0 && (
                     <Stage2
+                      rankings={msg.stage2}
                       aggregateRankings={msg.metadata?.aggregate_rankings}
                     />
                   )}

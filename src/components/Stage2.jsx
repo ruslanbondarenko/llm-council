@@ -1,10 +1,17 @@
 import { useState } from 'react';
 import './Stage2.css';
 
-export default function Stage2({ aggregateRankings }) {
+export default function Stage2({ rankings, aggregateRankings }) {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  if (!aggregateRankings || aggregateRankings.length === 0) {
+  console.log('Stage2 rendering with:', {
+    hasRankings: !!rankings,
+    rankingsLength: rankings?.length,
+    hasAggregateRankings: !!aggregateRankings,
+    aggregateRankingsLength: aggregateRankings?.length
+  });
+
+  if ((!rankings || rankings.length === 0) && (!aggregateRankings || aggregateRankings.length === 0)) {
     return (
       <div className="stage stage2">
         <h3 className="stage-title">Stage 2: Peer Rankings</h3>

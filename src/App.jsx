@@ -156,10 +156,12 @@ function App() {
         (eventType, event) => {
         switch (eventType) {
           case 'stage1_start':
+            console.log('Stage 1 started');
             setCurrentConversation((prev) => {
               if (!prev) return prev;
               const messages = prev.messages.map((msg, idx) => {
                 if (idx === prev.messages.length - 1 && msg.loading) {
+                  console.log('Setting stage1 loading to true');
                   return {
                     ...msg,
                     loading: { ...msg.loading, stage1: true },
@@ -172,10 +174,12 @@ function App() {
             break;
 
           case 'stage1_complete':
+            console.log('Stage 1 complete, data:', event.data);
             setCurrentConversation((prev) => {
               if (!prev) return prev;
               const messages = prev.messages.map((msg, idx) => {
                 if (idx === prev.messages.length - 1) {
+                  console.log('Updating stage1 in message, data length:', event.data?.length);
                   return {
                     ...msg,
                     stage1: event.data,
@@ -189,10 +193,12 @@ function App() {
             break;
 
           case 'stage2_start':
+            console.log('Stage 2 started');
             setCurrentConversation((prev) => {
               if (!prev) return prev;
               const messages = prev.messages.map((msg, idx) => {
                 if (idx === prev.messages.length - 1 && msg.loading) {
+                  console.log('Setting stage2 loading to true');
                   return {
                     ...msg,
                     loading: { ...msg.loading, stage2: true },
@@ -205,10 +211,14 @@ function App() {
             break;
 
           case 'stage2_complete':
+            console.log('Stage 2 complete, data:', event.data);
+            console.log('Stage 2 metadata:', event.metadata);
             setCurrentConversation((prev) => {
               if (!prev) return prev;
               const messages = prev.messages.map((msg, idx) => {
                 if (idx === prev.messages.length - 1) {
+                  console.log('Updating stage2 in message, data length:', event.data?.length);
+                  console.log('Aggregate rankings:', event.metadata?.aggregate_rankings);
                   return {
                     ...msg,
                     stage2: event.data,
