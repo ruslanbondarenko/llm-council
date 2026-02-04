@@ -12,44 +12,52 @@ function App() {
 
   // Load conversations on mount
   useEffect(() => {
+    console.log('🚀 App mounted, initializing...');
     loadConversations();
   }, []);
 
   // Load conversation details when selected
   useEffect(() => {
     if (currentConversationId) {
+      console.log('🔄 Selected conversation:', currentConversationId);
       loadConversation(currentConversationId);
     }
   }, [currentConversationId]);
 
   const loadConversations = async () => {
     try {
+      console.log('📂 Loading conversations list...');
       const convs = await api.listConversations();
+      console.log('📂 Loaded', convs.length, 'conversations');
       setConversations(convs);
     } catch (error) {
-      console.error('Failed to load conversations:', error);
+      console.error('❌ Failed to load conversations:', error);
     }
   };
 
   const loadConversation = async (id) => {
     try {
+      console.log('📖 Loading conversation:', id);
       const conv = await api.getConversation(id);
+      console.log('📖 Loaded conversation with', conv.messages.length, 'messages');
       setCurrentConversation(conv);
     } catch (error) {
-      console.error('Failed to load conversation:', error);
+      console.error('❌ Failed to load conversation:', error);
     }
   };
 
   const handleNewConversation = async () => {
     try {
+      console.log('➕ Creating new conversation...');
       const newConv = await api.createConversation();
+      console.log('➕ Created conversation:', newConv.id);
       setConversations([
         { id: newConv.id, created_at: newConv.created_at, message_count: 0 },
         ...conversations,
       ]);
       setCurrentConversationId(newConv.id);
     } catch (error) {
-      console.error('Failed to create conversation:', error);
+      console.error('❌ Failed to create conversation:', error);
     }
   };
 
@@ -60,6 +68,7 @@ function App() {
   const handleSendMessage = async (content) => {
     if (!currentConversationId) return;
 
+    console.log('📤 Sending message:', content);
     setIsLoading(true);
     try {
       // Optimistically add user message to UI
@@ -89,10 +98,13 @@ function App() {
         messages: [...prev.messages, assistantMessage],
       }));
 
+      console.log('🔄 Starting stream...');
       // Send message with streaming
       await api.sendMessageStream(currentConversationId, content, (eventType, event) => {
+        console.log('📨 Received event:', eventType, event);
         switch (eventType) {
           case 'stage1_start':
+            console.log('🟢 Stage 1 started');
             setCurrentConversation((prev) => {
               const messages = [...prev.messages];
               const lastMsg = messages[messages.length - 1];
@@ -102,6 +114,7 @@ function App() {
             break;
 
           case 'stage1_complete':
+            console.log('✅ Stage 1 complete:', event.data);
             setCurrentConversation((prev) => {
               const messages = [...prev.messages];
               const lastMsg = messages[messages.length - 1];
@@ -112,6 +125,7 @@ function App() {
             break;
 
           case 'stage2_start':
+            console.log('🟢 Stage 2 started');
             setCurrentConversation((prev) => {
               const messages = [...prev.messages];
               const lastMsg = messages[messages.length - 1];
@@ -121,6 +135,7 @@ function App() {
             break;
 
           case 'stage2_complete':
+            console.log('✅ Stage 2 complete:', event.data, 'Metadata:', event.metadata);
             setCurrentConversation((prev) => {
               const messages = [...prev.messages];
               const lastMsg = messages[messages.length - 1];
@@ -132,6 +147,7 @@ function App() {
             break;
 
           case 'stage3_start':
+            console.log('🟢 Stage 3 started');
             setCurrentConversation((prev) => {
               const messages = [...prev.messages];
               const lastMsg = messages[messages.length - 1];
@@ -141,6 +157,7 @@ function App() {
             break;
 
           case 'stage3_complete':
+            console.log('✅ Stage 3 complete:', event.data);
             setCurrentConversation((prev) => {
               const messages = [...prev.messages];
               const lastMsg = messages[messages.length - 1];
@@ -151,11 +168,13 @@ function App() {
             break;
 
           case 'title_complete':
+            console.log('📝 Title generated');
             // Reload conversations to get updated title
             loadConversations();
             break;
 
           case 'complete':
+            console.log('🎉 Stream complete!');
             // Stream complete, reload conversations list
             loadConversations();
             setIsLoading(false);
